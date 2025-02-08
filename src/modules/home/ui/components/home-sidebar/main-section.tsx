@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useClerk, useAuth } from "@clerk/nextjs";
+import { FlameIcon, HomeIcon, PlaySquareIcon } from "lucide-react";
+
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -7,8 +11,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { FlameIcon, HomeIcon, PlaySquareIcon } from "lucide-react";
-import Link from "next/link";
 
 const items = [
   {
@@ -30,6 +32,9 @@ const items = [
 ];
 
 export function MainSection() {
+  const { isSignedIn } = useAuth();
+  const clerk = useClerk();
+
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -40,7 +45,12 @@ export function MainSection() {
                 tooltip={item.title}
                 asChild
                 isActive={false} // TODO: Implement active state via pathname
-                onClick={() => console.log(item.url)} // TODO: Do something on click
+                onClick={(e) => {
+                  if (!isSignedIn && item.auth) {
+                    e.preventDefault();
+                    return clerk.openSignIn();
+                  }
+                }}
               >
                 <Link href={item.url} className="flex items-center gap-4">
                   <item.icon />
